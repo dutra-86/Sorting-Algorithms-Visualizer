@@ -114,6 +114,7 @@ class sort:
             j += 1
             k += 1
 
+        sound(list[i])
         plot_screen()
         verify = sort.check()
         if verify: return 0
@@ -130,22 +131,43 @@ class sort:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 return 0
             if event.type == pygame.QUIT:pygame.quit()
-        
-    def quick_sort():
-        global last_swapped
+    
+    def quick_sort(inicio=0, fim=None):
         pygame.time.delay(settings.speed)
-        last_swapped = [i,i+1]
+
+        if fim is None:
+            fim = len(list)-1
+        if inicio < fim:
+            p = sort.partition(inicio, fim)
+            sort.quick_sort(inicio, p-1)
+            sort.quick_sort(p+1, fim)
+
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    return 0
+                if event.type == pygame.QUIT:pygame.quit()
+        verify = sort.check()
+        if verify: return 0
+    
+    def partition(inicio, fim):
+        global last_swapped
+        pivot = list[fim]
+        i = inicio
+        for j in range(inicio, fim):
+            if list[j] <= pivot:
+                list[j], list[i] = list[i], list[j]
+                i = i + 1
+        list[i], list[fim] = list[fim], list[i]
+        last_swapped = [i,fim]
         sound(list[i])
         plot_screen()
-        for event in pygame.event.get():
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                return 0
-            if event.type == pygame.QUIT:pygame.quit()
+        return i
 
     def insertion_sort():
         global last_swapped
         for i in range(len(list)-1):
-            key = list[i]
+            pygame.time.delay(settings.speed)
+            key = list[i+1]
             j = i
                 
             while j >= 0 and key < list[j]:
@@ -154,7 +176,14 @@ class sort:
 
             list[j + 1] = key
             last_swapped = [j+1]
+            sound(list[i])
             plot_screen()
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    return 0
+                if event.type == pygame.QUIT:pygame.quit()
+        verify = sort.check()
+        if verify: return 0
 
 def sound(freq):
     if settings.sound == True:
