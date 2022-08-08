@@ -12,8 +12,9 @@ mouse_pos = pygame.mouse.get_pos()
 
 class settings:
     sound = True
-    speed = 50
-    array_size= 50
+    speed = 30
+    array_shown = 250
+    array_size = int(array_shown/4)+1
 
 class sort:
     def randomize():
@@ -26,6 +27,7 @@ class sort:
         global list
         while True:
             pygame.time.delay(settings.speed)
+            print(settings.speed)
             for i in range(len(list)-1):
                 if list[i] > list[i+1]:
                     temp = list[i]
@@ -40,7 +42,15 @@ class sort:
         2
 
     def merge_sort():
-        2
+        global list
+        while True:
+            pygame.time.delay(settings.speed)
+            
+            plot_screen()
+            for event in pygame.event.get():
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    return 0
+                if event.type == pygame.QUIT:pygame.quit()
 
     def quick_sort():
         2
@@ -82,7 +92,10 @@ def plot_screen():
     pygame.draw.rect(win, (20,20,20), (20,300,760,480))
 
     pygame.draw.rect(win, (137,177,177), (20+(3*window_w/4),160,160,60))
-    opt_txt = fonte(25).render(("Speed: "+str(settings.speed)), True, (0,0,0))
+    if settings.speed == 120: speed_status = 'slow'
+    elif settings.speed == 30: speed_status = 'medium'
+    elif settings.speed == 0: speed_status = 'fast'
+    opt_txt = fonte(25).render(("Speed: "+speed_status), True, (0,0,0))
     rect_txt = opt_txt.get_rect(center=(700,190))
     win.blit(opt_txt, rect_txt)
 
@@ -96,7 +109,14 @@ def plot_screen():
         opt_txt = fonte(25).render("Sound: OFF", True, (0,0,0))
         rect_txt = opt_txt.get_rect(center=(500,190))
         win.blit(opt_txt, rect_txt)
+    
+    opt_txt = fonte(28).render(("Array size:   "+str(int(settings.array_size))), True, (235,235,245))
+    rect_txt = opt_txt.get_rect(center=(100,260))
+    win.blit(opt_txt, rect_txt)
 
+    pygame.draw.rect(win, (137,177,177), (250,260,500,4))
+    pygame.draw.circle(win,(137,177,177),(250+(settings.array_shown),262),12)
+    pygame.draw.circle(win,(70,105,90),(250+(settings.array_shown),262),8)
     for i in range(len(list)):
         pygame.draw.rect(win, (200,200,200), (25+(i*750/len(list)), 778-list[i], (750/len(list))-1, list[i]))
 
@@ -127,8 +147,15 @@ while True:
             if int(event.pos[0]//200) == 2 and int(event.pos[1]//80) == 2:
                 settings.sound = not settings.sound
             if int(event.pos[0]//200) == 3 and int(event.pos[1]//80) == 2:
-                if settings.speed == 50:
-                    settings.speed = 150
-                elif settings.speed == 150:
-                    settings.speed = 50
+                if settings.speed == 120:
+                    settings.speed = 30
+                elif settings.speed == 30:
+                    settings.speed = 0
+                elif settings.speed == 0:
+                    settings.speed = 120
+            if int(event.pos[1]//80) == 3:
+                if event.pos[0] > 250 and event.pos[0] < 750:
+                    settings.array_shown = event.pos[0] - 250
+                    settings.array_size = int(settings.array_shown/4)+1
+                    sort.randomize()
         if event.type == pygame.QUIT:pygame.quit()
