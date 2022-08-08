@@ -27,7 +27,6 @@ class sort:
         global list
         while True:
             pygame.time.delay(settings.speed)
-            print(settings.speed)
             for i in range(len(list)-1):
                 if list[i] > list[i+1]:
                     temp = list[i]
@@ -114,9 +113,17 @@ def plot_screen():
     rect_txt = opt_txt.get_rect(center=(100,260))
     win.blit(opt_txt, rect_txt)
 
+    '''for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pygame.draw.rect(win, (137,177,177), (250,260,500,4))
+            pygame.draw.circle(win,(137,177,177),(event.pos[0],262),12)
+            pygame.draw.circle(win,(70,105,90),(event.pos[0],262),8)
+        else: '''
     pygame.draw.rect(win, (137,177,177), (250,260,500,4))
     pygame.draw.circle(win,(137,177,177),(250+(settings.array_shown),262),12)
     pygame.draw.circle(win,(70,105,90),(250+(settings.array_shown),262),8)
+
+
     for i in range(len(list)):
         pygame.draw.rect(win, (200,200,200), (25+(i*750/len(list)), 778-list[i], (750/len(list))-1, list[i]))
 
@@ -153,9 +160,17 @@ while True:
                     settings.speed = 0
                 elif settings.speed == 0:
                     settings.speed = 120
-            if int(event.pos[1]//80) == 3:
-                if event.pos[0] > 250 and event.pos[0] < 750:
-                    settings.array_shown = event.pos[0] - 250
-                    settings.array_size = int(settings.array_shown/4)+1
-                    sort.randomize()
+        
+        if pygame.mouse.get_pressed()[0]:
+            if int(event.pos[1]//80) == 3 and event.pos[0] > 250 and event.pos[0] < 750:
+                settings.array_shown = event.pos[0] - 250
+                settings.array_size = int((settings.array_shown)/4)+1
+                sort.randomize()
+        '''if event.type == pygame.MOUSEBUTTONUP and int(event.pos[1]//80) == 3 and event.pos[0] > 250 and event.pos[0] < 750:
+            sort.randomize()'''
         if event.type == pygame.QUIT:pygame.quit()
+    '''if int(pygame.mouse.get_pos()[1]//80) == 3 and pygame.mouse.get_pos()[0] > 250 and pygame.mouse.get_pos()[0] < 750 and pygame.key.get_pressed()[pygame.MOUSEBUTTONDOWN]:
+        print("AAAAAAAAAAAA")
+        settings.array_shown = event.pos[0] - 250
+        settings.array_size = int((settings.array_shown)/4)+1
+        sort.randomize()'''
