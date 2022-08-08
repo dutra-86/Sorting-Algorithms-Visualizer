@@ -1,3 +1,4 @@
+import numpy
 import pygame
 from random import randint
 pygame.init()
@@ -5,18 +6,28 @@ pygame.init()
 window_h=800
 window_w=800
 list = []
+last_swapped = []
 win = pygame.display.set_mode((window_h,window_w))
 pygame.display.set_caption("Sorting Algorithm Visualizer")
 
 mouse_pos = pygame.mouse.get_pos()
 
 class settings:
-    sound = True
+    sound = False
     speed = 30
     array_shown = 250
-    array_size = int(array_shown/4)+1
+    array_size = int(array_shown/2)+1
 
 class sort:
+
+    def check():
+        global last_swapped
+        for k in range(len(list)-1):
+            if list[k] > list[k+1]:
+                return 0
+        last_swapped = []
+        return True
+
     def randomize():
         global list
         list = [0] * settings.array_size
@@ -24,38 +35,138 @@ class sort:
             list[i] = randint(5,475)
 
     def bubble_sort():
-        global list
+        global last_swapped
         while True:
+            verify = sort.check()
+            if verify: return 0
             pygame.time.delay(settings.speed)
             for i in range(len(list)-1):
                 if list[i] > list[i+1]:
                     temp = list[i]
                     list[i] = list[i+1]
                     list[i+1] = temp
+                    last_swapped = [i,i+1]
+                    sound(list[i])
                     plot_screen()
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     return 0
                 if event.type == pygame.QUIT:pygame.quit()
+
     def selection_sort():
-        2
-
-    def merge_sort():
-        global list
-        while True:
+        global last_swapped
+        for i in range(len(list)):
             pygame.time.delay(settings.speed)
-            
-            plot_screen()
-            for event in pygame.event.get():
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    return 0
-                if event.type == pygame.QUIT:pygame.quit()
+            min = i
 
+            for j in range(i+1,len(list)):
+                if list[j] < list[min]:
+                    min = j
+
+            if list[i] != list[min]:
+                aux = list[i]
+                list[i] = list[min]
+                list[min] = aux
+                last_swapped = [i,min]
+                sound(list[i])
+                plot_screen()
+        verify = sort.check()
+        if verify: return 0
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                return 0
+            if event.type == pygame.QUIT:pygame.quit()
+
+    def merge(l, m, r):
+        global last_swapped
+        pygame.time.delay(settings.speed)
+        n1 = m - l + 1
+        n2 = r - m
+        L = [0] * (n1)
+        R = [0] * (n2)
+
+        for i in range(0, n1):
+            L[i] = list[l + i]
+
+        for j in range(0, n2):
+            R[j] = list[m + 1 + j]
+    
+        i = 0
+        j = 0
+        k = l
+        last_swapped = [k]
+        while i < n1 and j < n2:
+            if L[i] <= R[j]:
+                list[k] = L[i]
+                i += 1
+            else:
+                list[k] = R[j]
+                j += 1
+            k += 1
+    
+        while i < n1:
+            list[k] = L[i]
+            i += 1
+            k += 1
+    
+        while j < n2:
+            list[k] = R[j]
+            j += 1
+            k += 1
+
+        plot_screen()
+        verify = sort.check()
+        if verify: return 0
+    
+    def merge_sort(l, r):
+        if l < r:
+
+            m = l+(r-l)//2
+    
+            sort.merge_sort(l, m)
+            sort.merge_sort(m+1, r)
+            sort.merge(l, m, r)
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                return 0
+            if event.type == pygame.QUIT:pygame.quit()
+        
     def quick_sort():
-        2
+        global last_swapped
+        pygame.time.delay(settings.speed)
+        last_swapped = [i,i+1]
+        sound(list[i])
+        plot_screen()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                return 0
+            if event.type == pygame.QUIT:pygame.quit()
 
     def insertion_sort():
-        4
+        global last_swapped
+        for i in range(len(list)-1):
+            key = list[i]
+            j = i
+                
+            while j >= 0 and key < list[j]:
+                list[j + 1] = list[j]
+                j = j - 1
+
+            list[j + 1] = key
+            last_swapped = [j+1]
+            plot_screen()
+
+def sound(freq):
+    if settings.sound == True:
+        sampleRate = 44100
+        freq = 200+5*freq
+        pygame.mixer.init(44100,-16,2,512)
+        arr = numpy.array([4096 * numpy.sin(2.0 * numpy.pi * freq * x / sampleRate) for x in range(0, sampleRate)]).astype(numpy.int16)
+        arr2 = numpy.c_[arr,arr]
+        sound = pygame.sndarray.make_sound(arr2)
+        sound.play(-1)
+        pygame.time.delay(50)
+        sound.stop()
 
 def plot_screen():
     global settings
@@ -100,12 +211,12 @@ def plot_screen():
 
     if settings.sound == True:
         pygame.draw.rect(win, (20,180,20), (20+(2*window_w/4),160,160,60))
-        opt_txt = fonte(25).render("Sound: ON", True, (0,0,0))
+        opt_txt = fonte(25).render("Sound: ON (slower)", True, (0,0,0))
         rect_txt = opt_txt.get_rect(center=(500,190))
         win.blit(opt_txt, rect_txt)
     else:
         pygame.draw.rect(win, (180,20,20), (20+(2*window_w/4),160,160,60))
-        opt_txt = fonte(25).render("Sound: OFF", True, (0,0,0))
+        opt_txt = fonte(25).render("Sound: OFF (faster)", True, (0,0,0))
         rect_txt = opt_txt.get_rect(center=(500,190))
         win.blit(opt_txt, rect_txt)
     
@@ -126,6 +237,8 @@ def plot_screen():
 
     for i in range(len(list)):
         pygame.draw.rect(win, (200,200,200), (25+(i*750/len(list)), 778-list[i], (750/len(list))-1, list[i]))
+    for i in range(len(last_swapped)):
+        pygame.draw.rect(win, (255,50,50), (25+(last_swapped[i]*750/len(list)), 778-list[last_swapped[i]], (750/len(list))-1, list[last_swapped[i]]))
 
     pygame.display.update()
 
@@ -146,7 +259,7 @@ while True:
             if int(event.pos[0]//200) == 2 and int(event.pos[1]//80) == 1:
                 sort.selection_sort()
             if int(event.pos[0]//200) == 3 and int(event.pos[1]//80) == 1:
-                sort.merge_sort()
+                sort.merge_sort(0,len(list)-1)
             if int(event.pos[0]//200) == 0 and int(event.pos[1]//80) == 2:
                 sort.quick_sort()
             if int(event.pos[0]//200) == 1 and int(event.pos[1]//80) == 2:
@@ -162,15 +275,10 @@ while True:
                     settings.speed = 120
         
         if pygame.mouse.get_pressed()[0]:
-            if int(event.pos[1]//80) == 3 and event.pos[0] > 250 and event.pos[0] < 750:
-                settings.array_shown = event.pos[0] - 250
-                settings.array_size = int((settings.array_shown)/4)+1
-                sort.randomize()
-        '''if event.type == pygame.MOUSEBUTTONUP and int(event.pos[1]//80) == 3 and event.pos[0] > 250 and event.pos[0] < 750:
-            sort.randomize()'''
+            try:
+                if int(event.pos[1]//80) == 3 and event.pos[0] > 250 and event.pos[0] < 750:
+                    settings.array_shown = event.pos[0] - 250
+                    settings.array_size = int((settings.array_shown)/2)+1
+                    sort.randomize()
+            except: pass
         if event.type == pygame.QUIT:pygame.quit()
-    '''if int(pygame.mouse.get_pos()[1]//80) == 3 and pygame.mouse.get_pos()[0] > 250 and pygame.mouse.get_pos()[0] < 750 and pygame.key.get_pressed()[pygame.MOUSEBUTTONDOWN]:
-        print("AAAAAAAAAAAA")
-        settings.array_shown = event.pos[0] - 250
-        settings.array_size = int((settings.array_shown)/4)+1
-        sort.randomize()'''
